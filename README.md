@@ -24,5 +24,4 @@ This is a lightweight Python-based personal firewall built for Kali Linux. It us
 - Scapy
 - iptables
 - Kali Linux (VirtualBox VM)
-- (Optional) Tkinter for GUI
 
