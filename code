@@ -1,0 +1,67 @@
+from scapy.all import sniff, IP, TCP, UDP, DNS, DNSQR
+from datetime import datetime
+
+# ===============================
+# Rule Definitions
+# ===============================
+BLOCKED_IPS = ['192.168.1.10']          # Inbound IPs to block
+BLOCKED_PORTS = [23, 445]               # Block Telnet, SMB
+ALLOWED_PROTOCOLS = ['TCP', 'UDP']      # Allow only TCP/UDP
+BLOCKED_DOMAINS = ['example.com']       # Block DNS queries
+BLOCKED_OUTBOUND_IPS = ['8.8.8.8']      # Outbound IPs to block
+
+# ===============================
+# Logging
+# ===============================
+LOG_FILE = "firewall_log.txt"
+
+def log_packet(pkt, reason):
+    entry = f"{datetime.now()} | {pkt.summary()} | {reason}"
+    with open(LOG_FILE, 'a') as f:
+        f.write(entry + "\n")
+    print(entry)
+
+# ===============================
+# Packet Filtering Logic
+# ===============================
+def packet_filter(pkt):
+    if IP in pkt:
+        src_ip = pkt[IP].src
+        dst_ip = pkt[IP].dst
+
+        if src_ip in BLOCKED_IPS:
+            log_packet(pkt, f"Blocked Inbound IP: {src_ip}")
+            return
+
+        if dst_ip in BLOCKED_OUTBOUND_IPS:
+            log_packet(pkt, f"Blocked Outbound IP: {dst_ip}")
+            return
+
+        if TCP in pkt or UDP in pkt:
+            dport = pkt.dport
+
+            if dport in BLOCKED_PORTS:
+                log_packet(pkt, f"Blocked Port: {dport}")
+                return
+
+            if TCP in pkt and 'TCP' not in ALLOWED_PROTOCOLS:
+                log_packet(pkt, "Blocked Protocol: TCP")
+                return
+            if UDP in pkt and 'UDP' not in ALLOWED_PROTOCOLS:
+                log_packet(pkt, "Blocked Protocol: UDP")
+                return
+
+    if pkt.haslayer(DNS) and pkt.getlayer(DNS).qr == 0:
+        domain = pkt[DNSQR].qname.decode().strip('.')
+        for blocked in BLOCKED_DOMAINS:
+            if blocked in domain:
+                log_packet(pkt, f"Blocked DNS Query: {domain}")
+                return
+
+    log_packet(pkt, "Allowed")
+
+# ===============================
+# Start Sniffing
+# ===============================
+print("[*] Personal Firewall Running... Press CTRL+C to stop.")
+sniff(prn=packet_filter, store=0)
