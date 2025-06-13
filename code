@@ -7,7 +7,7 @@ from datetime import datetime
 BLOCKED_IPS = ['192.168.1.10']          # Inbound IPs to block
 BLOCKED_PORTS = [23, 445]               # Block Telnet, SMB
 ALLOWED_PROTOCOLS = ['TCP', 'UDP']      # Allow only TCP/UDP
-BLOCKED_DOMAINS = ['example.com']       # Block DNS queries
+BLOCKED_DOMAINS = ['testphp.vulnweb.com', 'testasp.vulnweb.com']       # Block DNS queries
 BLOCKED_OUTBOUND_IPS = ['8.8.8.8']      # Outbound IPs to block
 
 # ===============================
