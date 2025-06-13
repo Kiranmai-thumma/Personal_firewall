@@ -1,3 +1,13 @@
+#setup project & virtual environment
+
+mkdir ~/personal_firewall
+cd ~/personal_firewall
+python3 -m venv venv
+source venv/bin/activate
+pip install scapy
+
+# if you're running Kali or any Linux on your main system use above commands
+
 from scapy.all import sniff, IP, TCP, UDP, DNS, DNSQR
 from datetime import datetime
 
